@@ -4,6 +4,11 @@
 
 This file documents all notable changes to Sysdig Helm Chart. The release numbering uses [semantic versioning](http://semver.org).
 
+## v1.12.44
+### Minor changes
+
+- Add arm64 to the valid arch nodeAffinity matches
+
 ## v1.12.43
 ### Minor changes
 
