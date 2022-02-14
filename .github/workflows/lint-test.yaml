@@ -37,10 +37,32 @@ jobs:
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
-          changed=$(ct list-changed)
-          if [[ -n "$changed" ]]; then
+          changed_charts=$(ct list-changed | paste -s -d' ' -)
+          if [[ -n "$changed_charts" ]]; then
             echo "::set-output name=changed::true"
+            echo "::set-output name=changed_charts::$changed_charts"
           fi
+
+      - name: Run kubeval on charts
+        env:
+          CHANGED_CHARTS: ${{ steps.list-changed.outputs.changed_charts }}
+        run: |
+          set -ex
+          for chart in $CHANGED_CHARTS
+          do
+            cd $chart
+            mkdir gen
+
+            VALUES_FILES=$(find ci/ -iname "*.yaml")
+            for VALUES_FILE in $VALUES_FILES
+            do
+              helm template . -f $VALUES_FILE > gen/rendered.yaml
+              docker run -it -v $PWD/gen:/gen garethr/kubeval --ignore-missing-schemas /gen/rendered.yaml
+            done
+
+            rm -rf gen
+            cd -
+          done
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.2.0
