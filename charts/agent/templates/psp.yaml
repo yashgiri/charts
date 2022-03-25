@@ -3,6 +3,7 @@ apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
   name: {{ template "agent.fullname" . }}
+  namespace: {{ .Values.global.clusterConfig.namespace | default .Release.Namespace }}
 spec:
   allowedCapabilities:
   - '*'
